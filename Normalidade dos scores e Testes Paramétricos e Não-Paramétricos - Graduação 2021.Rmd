@@ -1,0 +1,297 @@
+---
+title: "Normalidade dos scores e Testes Paramétricos e Não-Paramétricos"
+author: "Lucas Yuki Okuno"
+date: "2023-08-29"
+output: html_document
+---
+## Importando as Bibliotecas
+
+```{r}
+rm(list = ls()) # Limpando o ambiente do R
+library(readxl)
+library(tidyverse)
+library(psych)
+library(ggplot2)
+library(dplyr)
+library(qacBase)
+library(ggpubr)
+library(dunn.test)
+```
+# Base de dados
+
+```{r}
+#df <- read_excel("GradUAÇÃOLIMITES.xlsx", col_names=TRUE)
+df <- read_excel("Graduação2021.xlsx", col_names=TRUE)
+attach(df)
+
+```
+
+# Transformando as variáveis em números inteiros
+
+```{r}
+df <- transform(df,Q02 = as.integer(Q02),Q03 = as.integer(Q03),Q04 = as.integer(Q04),
+                 Q05 = as.integer(Q05),Q06 = as.integer(Q06),Q07 = as.integer(Q07),
+                 Q08 = as.integer(Q08),Q09 = as.integer(Q09), Q10 = as.integer(Q10),
+                 Q11 = as.integer(Q11),Q12 = as.integer(Q12), Q13 = as.integer(Q13),
+                 Q14 = as.integer(Q14),Q15 = as.integer(Q15), Q16 = as.integer(Q16),
+                 Q17 = as.integer(Q17),Q18 = as.integer(Q18), Q19 = as.integer(Q19),
+                 Q20 = as.integer(Q20),Q21 = as.integer(Q21))
+
+df <- transform(df, Q46 = as.integer(Q46), Q47 = as.integer(Q47), Q49 = as.integer(Q49),
+                Q50 = as.integer(Q50), Q51 = as.integer(Q51), Q52 = as.integer(Q52),
+                Q53 = as.integer(Q53), Q54 = as.integer(Q54), Q55 = as.integer(Q55),
+                Q56 = as.integer(Q56), Q57 = as.integer(Q57))
+
+df <- transform(df, Q60 = as.integer(Q60), Q61 = as.integer(Q61), Q62 = as.integer(Q62),
+                Q63 = as.integer(Q63), Q64 = as.integer(Q64), Q65 = as.integer(Q65),
+                Q66 = as.integer(Q66), Q67 = as.integer(Q67))
+                             
+df <- transform(df, Q68 = as.integer(Q68), Q69 = as.integer(Q69), Q70 = as.integer(Q70),
+                Q71 = as.integer(Q71), Q72 = as.integer(Q72), Q73 = as.integer(Q73))
+
+df <- transform(df, Q74 = as.integer(Q74), Q75 = as.integer(Q75), Q76 = as.integer(Q76),
+                Q77 = as.integer(Q77), Q78 = as.integer(Q78), Q79 = as.integer(Q79),
+                Q80 = as.integer(Q80), Q81 = as.integer(Q81), Q82 = as.integer(Q82),
+                Q83 = as.integer(Q83))
+```
+
+
+# Normalidade dos scores
+
+### score RC
+```{r}
+hist(scoreRC, prob=TRUE, main='Histograma I', xlab='scoreRC',ylab='Densidade')
+lines(density(scoreRC), col='red')
+#Analisando o gráfico QQPlot vemos que os dados est?o contidos dentro do envelope
+
+shapiro.test(scoreRC) #p-valor > 0.05  => Apresenta Normalidade
+ggqqplot(scoreRC, main = "Normal Q-Q Plot scoreRC", pch = 20)
+#Como pvalor = 0.2295 > 0.05, nao ha evidencias para rejeitarmos a hipotese H0, logo, os dados seguem a distribuicao normal.
+```
+
+### score PTC
+```{r}
+hist(scorePTC, prob=TRUE, main='Histograma II', xlab='scorePTC',ylab='Densidade')
+lines(density(scorePTC), col='red')
+# Muitas observações fora do envelope, indicando não normalidade
+
+shapiro.test(scorePTC) #p-valor > 0.05  => Apresenta Normalidade
+ggqqplot(scorePTC, main = "Normal Q-Q Plot scorePTC", pch = 20)
+#p-valor << 0.05  => Nao apresenta Normalidade
+```
+
+### score NA
+```{r}
+hist(scoreNA, prob=TRUE, main='Histograma III', xlab='scoreNA',ylab='Densidade')
+lines(density(scoreNA), col='red')
+
+shapiro.test(scoreNA) #p-valor << 0.05  => Não Apresenta Normalidade
+ggqqplot(scoreNA, main = "Normal Q-Q Plot scoreNA", pch = 20)
+```
+
+### score DifAcad
+```{r}
+hist(scoreDifAcad, prob=TRUE, main='Histograma IV', xlab='scoreDifAcad',ylab='Densidade')
+lines(density(scoreDifAcad), col='red')
+
+shapiro.test(scoreDifAcad) #p-valor > 0.05  => Apresenta Normalidade
+ggqqplot(scoreDifAcad, main = "Normal Q-Q Plot DifAcad", pch = 20)
+```
+
+### score SRQ20
+```{r}
+hist(scoreSQR, prob=TRUE, main='Histograma V', xlab='scoreSQR',ylab='Densidade')
+lines(density(scoreSQR), col='red')
+
+shapiro.test(scoreSQR) #p-valor << 0.05  => Nao apresenta Normalidade
+ggqqplot(scoreSQR, main = "Normal Q-Q Plot DifAcad", pch = 20)
+# Atraves do QQplot vemos que o scoreSRQ nao segue normalidade
+```
+
+# Aplicando os testes Paramétricos e Não Paramétricos
+
+## Testes Paramétricos 
+
+### comparando scoreRC
+
+```{r}
+#por etnia
+etnia <- subset(EtniaAgrupamento, EtniaAgrupamento == 'Branco'| EtniaAgrupamento == 'Não-Branco')
+
+genero <- subset(GeneroAgrupamento, GeneroAgrupamento == 'Mulher' | GeneroAgrupamento == 'Homem' | GeneroAgrupamento == 'Outras identidades')
+
+RC1 <- subset(scoreRC, EtniaAgrupamento == 'Branco'| EtniaAgrupamento == 'Não-Branco')
+
+a <- aov(RC1 ~ etnia)
+summary(a)
+
+#por idade
+b <- aov(scoreRC ~ IdadeAgrupamento)
+summary(b)
+
+#por ano de ingresso
+c <- aov(scoreRC ~ AnoIngressoAgrupamento)
+summary(c)
+
+#por genero
+RC2 <- subset(scoreRC, GeneroAgrupamento == 'Mulher' | GeneroAgrupamento == 'Homem' | GeneroAgrupamento == 'Outras identidades')
+
+d <- aov(RC2 ~ genero)
+summary(d)
+```
+
+### Plotando grupos que possuem diferença em relação ao scoreRC
+```{r}
+boxplot(RC1 ~ etnia, col = '#bbdec9', ylab ='scoreRC', xlab='Etnia')
+boxplot(scoreRC ~ IdadeAgrupamento, col = '#bbdec9', xlab='Idade', ylab='scoreRC')
+boxplot(scoreRC ~ AnoIngressoAgrupamento, col = '#bbdec9', xlab = 'Ano de Ingresso', ylab='scoreRC')
+boxplot(RC2 ~ genero, col = '#bbdec9', ylab='scoreRC', xlab='Gênero')
+```
+
+# comparando scoreDifAcad
+
+```{r}
+#por etnia
+DA1 <- subset(scoreDifAcad, EtniaAgrupamento == 'Branco'| EtniaAgrupamento == 'Não-Branco')
+
+e <- aov(DA1 ~ etnia)
+summary(e)
+
+#por idade
+f <- aov(scoreDifAcad ~ IdadeAgrupamento) #rejeita h0, logo teste post hoc
+summary(f)
+
+TukeyHSD(f, conf.level=.95) #Post hoc Tukey
+
+#por ano de ingresso
+g <- aov(scoreDifAcad ~ AnoIngressoAgrupamento)
+summary(g)
+
+#por genero
+DA2 <- subset(scoreDifAcad, GeneroAgrupamento == 'Mulher' | GeneroAgrupamento == 'Homem' | GeneroAgrupamento == 'Outras identidades')
+
+h <- aov(DA2 ~ genero)
+summary(h)
+
+TukeyHSD(h, conf.level=.95)
+```
+
+### Plotando grupos que possuem diferença em relação ao scoreDifAcad
+```{r}
+boxplot(DA1 ~ etnia, col = '#bbdec9', ylab ='scoreDifAcad', xlab='Etnia')
+boxplot(scoreDifAcad ~ IdadeAgrupamento, col = '#bbdec9', xlab='Idade', ylab='scoreDifAcad')
+boxplot(scoreDifAcad ~ AnoIngressoAgrupamento, col = '#bbdec9', xlab = 'Ano de Ingresso', ylab='scoreDifAcad')
+boxplot(DA2 ~ genero, col = '#bbdec9', ylab='scoreDifAcad', xlab='G?nero')
+```
+
+## Testes Não-Paramétricos
+
+### comparando scoreSRQ:
+
+```{r}
+#substet para retirar o não deseja identificar
+etnia <- subset(EtniaAgrupamento, EtniaAgrupamento == 'Branco'| EtniaAgrupamento == 'Não-Branco')
+SRQ1 <- subset(scoreSQR, EtniaAgrupamento == 'Branco'| EtniaAgrupamento == 'Não-Branco')
+
+#por etnia
+
+kruskal.test(SRQ1 ~ etnia)  # Não rejeitamos H0 (medianas similares quando comparado por etnia)
+
+
+#por idade
+kruskal.test(scoreSQR ~ IdadeAgrupamento) #Rejeitamos H0, logo fazemos post hoc
+
+dunn.test(scoreSQR, IdadeAgrupamento, altp = TRUE) #post hoc: teste de dunn
+
+#por ano de ingresso
+kruskal.test(scoreSQR ~ AnoIngressoAgrupamento) #Rejeitamos H0
+
+dunn.test(scoreSQR, AnoIngressoAgrupamento, altp = TRUE) #post hoc: teste de dunn
+
+# por genero    
+genero <- subset(GeneroAgrupamento, GeneroAgrupamento == 'Mulher' | GeneroAgrupamento == 'Homem' | GeneroAgrupamento == 'Outras identidades')
+
+SRQ2 <- subset(scoreSQR, GeneroAgrupamento == 'Mulher' | GeneroAgrupamento == 'Homem' | GeneroAgrupamento == 'Outras identidades')
+
+kruskal.test(SRQ2 ~ genero)  #rejeitamos H0
+
+dunn.test(SRQ2, genero, altp = TRUE)
+
+```
+
+### Plotando grupos que possuem diferença em relação ao scoreSRQ
+
+```{r}
+boxplot(SRQ1 ~ etnia, col = '#bbdec9', ylab ='scoreSRQ')
+boxplot(scoreSQR ~ IdadeAgrupamento, col = '#bbdec9', xlab='Idade', ylab='scoreSRQ')
+boxplot(scoreSQR ~ AnoIngressoAgrupamento, col = '#bbdec9', xlab = 'Ano de Ingresso', ylab='scoreSRQ')
+boxplot(SRQ2 ~ genero, col = '#bbdec9', ylab='scoreSRQ', xlab='Gênero')
+
+```
+
+### comparando scorePTC:
+
+```{r}
+#por etnia
+PTC1 <- subset(scorePTC, EtniaAgrupamento == 'Branco'| EtniaAgrupamento == 'Não-Branco')
+kruskal.test(PTC1 ~ etnia)  #rejeitamos H0 
+#(nem todas as medianas são similares quando comparado por etnia)
+
+dunn.test(PTC1, etnia, altp = TRUE)
+
+#por idade
+kruskal.test(scorePTC ~ IdadeAgrupamento) #não Rejeitamos H0
+
+#por ano de ingresso
+kruskal.test(scorePTC ~ AnoIngressoAgrupamento) #não Rejeitamos H0
+
+#por genero
+PTC2 <- subset(scorePTC, GeneroAgrupamento == 'Mulher' | GeneroAgrupamento == 'Homem' | GeneroAgrupamento == 'Outras identidades')
+kruskal.test(PTC2 ~ genero)
+```
+### Plotando grupos que possuem diferença em relação ao scorePTC
+
+```{r}
+
+boxplot(PTC1 ~ etnia, col = '#bbdec9', ylab ='scorePTC', xlab='Etnia')
+boxplot(scorePTC ~ IdadeAgrupamento, col = '#bbdec9', xlab='Idade', ylab='scorePTC')
+boxplot(scorePTC ~ AnoIngressoAgrupamento, col = '#bbdec9', xlab = 'Ano de Ingresso', ylab='scorePTC')
+boxplot(PTC2 ~ genero, col = '#bbdec9', ylab='scorePTC', xlab='Gênero')
+```
+
+### comparando NA:
+
+```{r}
+#por etnia
+NA1 <- subset(scoreNA, EtniaAgrupamento == 'Branco'| EtniaAgrupamento == 'Não-Branco')
+kruskal.test(NA1 ~ etnia)  #rejeitamos H0 
+#(nem todas as medianas são similares quando comparado por etnia)
+
+dunn.test(NA1, etnia, altp = TRUE)
+
+
+#por idade
+kruskal.test(scoreNA ~ IdadeAgrupamento) #Rejeitamos H0
+
+dunn.test(scoreNA, IdadeAgrupamento, altp = TRUE)
+
+#por ano de ingresso
+kruskal.test(scoreNA ~ AnoIngressoAgrupamento) #Rejeitamos H0
+
+dunn.test(scoreNA, AnoIngressoAgrupamento, altp = TRUE)
+
+#por genero
+NA2 <- subset(scoreNA, GeneroAgrupamento == 'Mulher' | GeneroAgrupamento == 'Homem' | GeneroAgrupamento == 'Outras identidades')
+kruskal.test(NA2 ~ genero) #Rejeitamos H0
+
+dunn.test(NA2, genero, altp = TRUE)
+```
+### Plotando grupos que possuem diferença em relação ao scoreNA
+
+```{r}
+
+boxplot(NA1 ~ etnia, col = '#bbdec9', ylab ='scoreNA', xlab='Etnia')
+boxplot(scoreNA ~ IdadeAgrupamento, col = '#bbdec9', xlab='Idade', ylab='scoreNA')
+boxplot(scoreNA ~ AnoIngressoAgrupamento, col = '#bbdec9', xlab = 'Ano de Ingresso', ylab='scoreNA')
+boxplot(NA2 ~ genero, col = '#bbdec9', ylab='scoreNA', xlab='Gênero')
+```

@@ -1,0 +1,148 @@
+---
+title: "Análise Psicométrica dos Dados - Graduação 2021"
+author: "Lucas Yuki Okuno"
+date: "2023-08-29"
+output: html_document
+---
+
+## Importando as Bibliotecas
+
+```{r}
+rm(list = ls()) # Limpando o ambiente do R
+library(readxl)
+library(tidyverse)
+library(psych)
+library(ggplot2)
+library(dplyr)
+library(qacBase)
+library(ggpubr)
+library(dunn.test)
+```
+# Base de dados
+
+```{r}
+#df <- read_excel("GradUAÇÃOLIMITES.xlsx", col_names=TRUE)
+df <- read_excel("Graduação2021.xlsx", col_names=TRUE)
+attach(df)
+
+```
+
+# Transformando as variáveis em números inteiros
+
+```{r}
+df <- transform(df,Q02 = as.integer(Q02),Q03 = as.integer(Q03),Q04 = as.integer(Q04),
+                 Q05 = as.integer(Q05),Q06 = as.integer(Q06),Q07 = as.integer(Q07),
+                 Q08 = as.integer(Q08),Q09 = as.integer(Q09), Q10 = as.integer(Q10),
+                 Q11 = as.integer(Q11),Q12 = as.integer(Q12), Q13 = as.integer(Q13),
+                 Q14 = as.integer(Q14),Q15 = as.integer(Q15), Q16 = as.integer(Q16),
+                 Q17 = as.integer(Q17),Q18 = as.integer(Q18), Q19 = as.integer(Q19),
+                 Q20 = as.integer(Q20),Q21 = as.integer(Q21))
+
+df <- transform(df, Q46 = as.integer(Q46), Q47 = as.integer(Q47), Q49 = as.integer(Q49),
+                Q50 = as.integer(Q50), Q51 = as.integer(Q51), Q52 = as.integer(Q52),
+                Q53 = as.integer(Q53), Q54 = as.integer(Q54), Q55 = as.integer(Q55),
+                Q56 = as.integer(Q56), Q57 = as.integer(Q57))
+
+df <- transform(df, Q60 = as.integer(Q60), Q61 = as.integer(Q61), Q62 = as.integer(Q62),
+                Q63 = as.integer(Q63), Q64 = as.integer(Q64), Q65 = as.integer(Q65),
+                Q66 = as.integer(Q66), Q67 = as.integer(Q67))
+                             
+df <- transform(df, Q68 = as.integer(Q68), Q69 = as.integer(Q69), Q70 = as.integer(Q70),
+                Q71 = as.integer(Q71), Q72 = as.integer(Q72), Q73 = as.integer(Q73))
+
+df <- transform(df, Q74 = as.integer(Q74), Q75 = as.integer(Q75), Q76 = as.integer(Q76),
+                Q77 = as.integer(Q77), Q78 = as.integer(Q78), Q79 = as.integer(Q79),
+                Q80 = as.integer(Q80), Q81 = as.integer(Q81), Q82 = as.integer(Q82),
+                Q83 = as.integer(Q83))
+```
+
+# Alfa de Crobach
+
+### Calculando o Alfa De cronbach - SRQ20
+
+```{r,warning = FALSE, message = FALSE}
+
+mean(scoreSQR)
+sd(scoreSQR)
+
+escalaSRQ = df[,c(6:25)]
+head(escalaSRQ)
+
+alpha(escalaSRQ)
+
+ord1 <- polychoric(escalaSRQ)
+alpha(ord1$rho)
+```
+
+### Calculando o alfa de Cronbach - informacoes academicas 
+
+```{r,warning = FALSE}
+escalaINFA = df[,c(55,56,58,59,60,61,62,63,64,65,66)]
+head(escalaINFA)
+
+alpha(escalaINFA)
+
+ord2 <- polychoric(escalaINFA)
+alpha(ord2$rho)
+```
+
+### Calculando o alfa de Cronbach - escala INFA sem Q54 (DifAcad)
+
+```{r,warning = FALSE}
+mean(scoreDifAcad)
+sd(scoreDifAcad)
+
+escaladifAcad = df[,c(55,56,58,59,60,61,62,64,65,66)]
+head(escaladifAcad)
+
+alpha(escaladifAcad)
+
+ord6 <- polychoric(escaladifAcad)
+alpha(ord6$rho)
+```
+
+### Calculando o alfa de Cronbach - Relacoes e comunicacao na univesidade
+
+```{r,warning = FALSE}
+mean(scoreRC)
+sd(scoreRC)
+
+escalaRCU = df[,c(69:76)]
+head(escalaRCU)
+
+alpha(escalaRCU)
+
+ord3 <- polychoric(escalaRCU)
+alpha(ord3$rho)
+```
+
+### Calculando o alfa de Cronbach - Pertencimento
+
+```{r,warning = FALSE}
+mean(scorePTC)
+sd(scorePTC)
+
+escalaPTC = df[,c(78:83)]
+head(escalaPTC)
+
+alpha(escalaPTC)
+
+ord4 <- polychoric(escalaPTC)
+alpha(ord4$rho)
+
+```
+
+### Calculando o alfa de Cronbach - Necessidade de apoio
+
+```{r,warning = FALSE}
+mean(scoreNA)
+sd(scoreNA)
+
+escalaNA = df[,c(87:96)]
+head(escalaNA)
+
+alpha(escalaNA)
+
+ord5 <- polychoric(escalaNA)
+alpha(ord5$rho)
+```

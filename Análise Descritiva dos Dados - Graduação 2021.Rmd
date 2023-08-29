@@ -1,0 +1,161 @@
+---
+title: "Análise Descritiva dos Dados - Graduação 2021"
+author: "Lucas Yuki Okuno"
+date: "2023-08-29"
+output: html_document
+---
+
+## Importando as Bibliotecas
+
+```{r}
+rm(list = ls()) # Limpando o ambiente do R
+library(readxl)
+library(tidyverse)
+library(psych)
+library(ggplot2)
+library(dplyr)
+library(qacBase)
+```
+
+# Base de dados
+
+```{r}
+df <- read_excel("Graduação2021.xlsx", col_names=TRUE)
+attach(df)
+```
+
+# Transformando as variáveis em números inteiros
+
+```{r}
+df <- transform(df,Q02 = as.integer(Q02),Q03 = as.integer(Q03),Q04 = as.integer(Q04),
+                 Q05 = as.integer(Q05),Q06 = as.integer(Q06),Q07 = as.integer(Q07),
+                 Q08 = as.integer(Q08),Q09 = as.integer(Q09), Q10 = as.integer(Q10),
+                 Q11 = as.integer(Q11),Q12 = as.integer(Q12), Q13 = as.integer(Q13),
+                 Q14 = as.integer(Q14),Q15 = as.integer(Q15), Q16 = as.integer(Q16),
+                 Q17 = as.integer(Q17),Q18 = as.integer(Q18), Q19 = as.integer(Q19),
+                 Q20 = as.integer(Q20),Q21 = as.integer(Q21))
+
+df <- transform(df, Q46 = as.integer(Q46), Q47 = as.integer(Q47), Q49 = as.integer(Q49),
+                Q50 = as.integer(Q50), Q51 = as.integer(Q51), Q52 = as.integer(Q52),
+                Q53 = as.integer(Q53), Q54 = as.integer(Q54), Q55 = as.integer(Q55),
+                Q56 = as.integer(Q56), Q57 = as.integer(Q57))
+
+df <- transform(df, Q60 = as.integer(Q60), Q61 = as.integer(Q61), Q62 = as.integer(Q62),
+                Q63 = as.integer(Q63), Q64 = as.integer(Q64), Q65 = as.integer(Q65),
+                Q66 = as.integer(Q66), Q67 = as.integer(Q67))
+                             
+df <- transform(df, Q68 = as.integer(Q68), Q69 = as.integer(Q69), Q70 = as.integer(Q70),
+                Q71 = as.integer(Q71), Q72 = as.integer(Q72), Q73 = as.integer(Q73))
+
+df <- transform(df, Q74 = as.integer(Q74), Q75 = as.integer(Q75), Q76 = as.integer(Q76),
+                Q77 = as.integer(Q77), Q78 = as.integer(Q78), Q79 = as.integer(Q79),
+                Q80 = as.integer(Q80), Q81 = as.integer(Q81), Q82 = as.integer(Q82),
+                Q83 = as.integer(Q83))
+```
+
+# Resumo Estatístico das Variáveis por grupo
+
+### SRQ20 - Mediana e Quartis
+```{r}
+tapply(as.numeric(scoreSQR),IdadeAgrupamento, summary)
+tapply(as.numeric(scoreSQR),EtniaAgrupamento, summary)
+tapply(as.numeric(scoreSQR),GeneroAgrupamento, summary)
+tapply(as.numeric(scoreSQR),AnoIngressoAgrupamento, summary)
+```
+
+### score RC- Media e Quartis
+```{r}
+tapply(scoreRC,IdadeAgrupamento, summary)
+tapply(scoreRC,EtniaAgrupamento, summary)
+tapply(scoreRC,GeneroAgrupamento, summary)
+tapply(scoreRC,AnoIngressoAgrupamento, summary)
+```
+
+### score PTC- Mediana e Quartis
+```{r}
+tapply(scorePTC,IdadeAgrupamento, summary)
+tapply(scorePTC,EtniaAgrupamento, summary)
+tapply(scorePTC,GeneroAgrupamento, summary)
+tapply(scorePTC,AnoIngressoAgrupamento, summary)
+```
+
+### score NA - Mediana e Quartis
+
+```{r}
+tapply(scoreNA,IdadeAgrupamento, summary)
+tapply(scoreNA,EtniaAgrupamento, summary)
+tapply(scoreNA,GeneroAgrupamento, summary)
+tapply(scoreNA,AnoIngressoAgrupamento, summary)
+```
+
+### score DifAcad - Mediana e Quartis
+
+```{r}
+tapply(scoreDifAcad,IdadeAgrupamento, summary)
+tapply(scoreDifAcad,EtniaAgrupamento, summary)
+tapply(scoreDifAcad,GeneroAgrupamento, summary)
+tapply(scoreDifAcad,AnoIngressoAgrupamento, summary)
+```
+
+# Analise exploratoria dos Dados
+
+## Idade
+
+```{r}
+par(mfrow=c(1,2))
+boxplot(as.integer(Q22), las= 2, main = "BoxPlot: Idade", col = "#D8BFD8") #outliers
+
+barplot(table(Q22), las= 2, main = "Distribuição da Idade para graduandos da
+     USP - São Carlos", xlab = "Idade", ylab = "Frequência", col = "#D8BFD8")
+```
+
+## Raça/Etnia e Gênero
+
+```{r}
+barplot(main = "Raça/Etnia", table(Q23), col = c("#D8BFD8"), cex.names = 0.8)
+barplot(main = "Gênero", table(Q24), col = c("#D8BFD8"), cex.names = 0.8)
+```
+
+## Ano de Ingresso
+
+```{r}
+#table(as.integer(Q37A))
+barplot(table(as.integer(Q37A)), main = "Ano de Ingresso - Graduação", col = "#D8BFD8", xlab = "Ano")
+plot(x = as.integer(Q37A), y = scoreSQR, main = "scoreSRQ x Ano de Ingresso",
+     xlab = "Ano", col = "red", pch = 20)
+
+```
+
+## Instituto
+
+```{r}
+ggplot(data=df, aes(Q28)) +ggtitle("Instituto")+ geom_bar()+ theme(axis.text =element_text(size =10, angle=45))
+```
+
+# Frequencias
+
+```{r}
+par(mfrow=c(2,2))
+
+barplot(main = "Frequência nível SRQ",table(nivelSQR), col = "#FF7F50")
+barplot(main = "Frequência score SRQ",table(scoreSQR), col = "#FF7F50", ylab = "frequencia", xlab = "score")
+barplot(main = "Ideação Suicída", table(as.integer(IS)), col = c("#FF7F50"))
+```
+
+# Conhecimento sobre Apoia USP e Gapsi
+
+```{r}
+par(mfrow=c(1,2))
+
+barplot(main = "Conhece o Apoia USP", table(Q30), col = c("#FF7F50"))
+barplot(main = "Ja procurou o Apoia USP", table(Q31), col = c("#FF7F50"))
+```
+
+# SRQ20
+
+```{r}
+barplot(main = "score SRQ20 ", table(as.integer(scoreSQR)), col = c("#FF7F50"), cex.names = 0.8)
+```
+
+
+
