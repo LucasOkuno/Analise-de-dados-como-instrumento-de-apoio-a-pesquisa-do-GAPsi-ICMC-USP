@@ -1,0 +1,183 @@
+---
+title: Determinação do número de amostras para estimar a média do SRQ20 para a pesquisa
+  do GAPsi com os Docentes 2023 usando populações finitas
+author: 
+- Lucas Yuki Okuno
+date: "2023-08-07"
+output:
+  word_document: default
+  html_document: default
+  pdf_document: default
+---
+
+# Introdução
+
+# Métodos e Resultados
+
+De acordo com os dados disponibilizados em [População USP](http://www.saocarlos.usp.br/wp-content/uploads/2022/01/N%C3%BAmeros-USP-S%C3%A3o-Carlos-2021-1.pdf), conseguimos obter as informações à respeito da nossa População que são os docentes da USP - São Carlos em 2023, obtendo os seguintes resultados:
+
+```{r, echo=FALSE}
+# Criar os vetores com os dados
+institutos <- c("EESC", "ICMC", "IFSC", "IQSC", "IAU", "Outros","Total")
+pop <- c(181, 126, 78, 51, 37, 16, 489)
+
+N=489
+
+# Criar a tabela
+dados <- data.frame(Institutos = institutos, População = pop)
+#knitr::kable(dados, format = "html", align = "l")
+print(dados)
+```
+
+Sendo N o valor do tamanho populacional, que é 489.
+
+Para determinar o tamanho da amostra utilizaremos a seguinte fórmula:
+
+$$ n= \frac{\frac{z^2 p(1-p)}{e^2}}{1+\frac{z^2 p(1-p)}{e^2 N}}$$
+
+em que:
+
+-   n = Número de individuos na amostra
+-   $z$ = Valor critico correspondente ao grau de confiança desejado
+-   e = Margem de erro
+-   p = Proporção
+-   N = Tamanho Populacional
+
+Utilizaremos $\alpha = 0.05$ para determinar o nível de confiança e $e = 0.05$ como erro máximo permitido. Além disso, a proporção será de $p=0.2$.
+
+Aplicando na fórmula, temos que o tamanho da amostra será:
+
+$$ n= \frac{\frac{1,96^2 0,2(1-0,2)}{0,05^2}}{1+\frac{1,96^2 0,2(1-0,2)}{0,05^2 489}}$$
+
+
+```{r}
+alfa <- 0.05
+z_alfa<- qnorm(1-alfa/2)
+p = 0.20
+e=0.05
+N=489
+n=(((z_alfa^2)*p*(1-p))/e^2)/(1+(((z_alfa^2)*p*(1-p))/((e^2)*N)))
+cat("n =",round(n,digits=0),"\n")
+```
+
+Visto que o campus é divido em institutos, podemos agora utilizar técnicas de amostragem estratificada para encontrar a quantidade de amostras necessárias em cada um dos institutos para obter o número de amostras necessárias em cada um deles.
+
+## Alocação Proporcional
+
+Nesse método, as unidades populacionais (que em nosso caso são cada um dos institutos do campus) são distribuídas nos estratos segundo as proporções:
+
+$W_h =\frac{ N_h}{N}, h = 1,...,H$ com $\sum_{h=1}^{H}W_h=1$
+
+As proporções amostrais nos institutos são definidas como:
+
+$\lambda_h = \frac{n_h}{n}, h=1,...,H$ com $\sum_{h=1}^{H}\lambda_h=1$
+
+Assim, o critério de alocação proporcional implica em:
+
+$\lambda_h = W_h,\forall h=1,...,H.$
+
+Logo:
+
+$n_h = n\frac{N_h}{N}=nW_h, \forall h = 1,...,H.$
+
+Esta distribuição da amostra nos estratos é denominada Alocação Proporcional e iremos fazer o seu cálculo para os institutos da USP-São Carlos.
+
+Sabemos que:
+
+Total Populacional $(N) = 489$
+
+Tamanho da amostra $(n) = 163$
+
+```{r, echo = FALSE}
+# Criar os vetores com os dados
+Estratos <- c("EESC", "ICMC", "IFSC", "IQSC", "IAU", "Outros")
+Nh <- c(181, 126, 78, 51, 37, 16)
+
+# Criar a tabela
+dados <- data.frame(Estratos = Estratos, Nh = Nh)
+#knitr::kable(dados, format = "html", align = "l")
+print(dados)
+```
+
+Dessa forma, para encontrar a Alocação Proporcional de amostras para cada um dos institutos, basta calcular:
+
+### EESC
+
+$n = 163*\frac{181}{489} = 61$
+
+```{r, echo = FALSE}
+n_1 = n*181/N
+cat("Amostra EESC:",round(n_1,digits=0),"\n")
+```
+
+### ICMC
+
+$n = 163*\frac{126}{489} = 42$
+
+```{r, echo = FALSE}
+n_2 = n*126/N
+cat("Amostra ICMC:",round(n_2,digits=0),"\n")
+```
+
+### IFSC
+
+$n = 163*\frac{78}{489} = 26$
+
+```{r, echo = FALSE}
+n_3 = n*78/N
+cat("Amostra IFSC:",round(n_3,digits=0),"\n")
+```
+
+### IQSC
+
+$n = 163*\frac{51}{489} = 17$
+
+```{r, echo = FALSE}
+n_4 = n*51/N
+cat("Amostra IQSC:",round(n_4,digits=0),"\n")
+```
+
+### IAU
+
+$n = 163*\frac{37}{489} = 12$
+
+```{r, echo = FALSE}
+n_5 = n*37/N
+cat("Amostra IAU:",round(n_5,digits=0),"\n")
+```
+
+### Outros
+
+$n = 163*\frac{16}{489} = 5$
+
+```{r, echo = FALSE}
+n_6 = n*16/N
+cat("Amostra Outros:",round(n_6,digits=0),"\n")
+```
+
+Dessa forma, utilizando a alocação proporcional, a nossa amostra de 163 indivíduos seria dividida da seguinte forma:
+
+```{r, echo = FALSE}
+# Criar os vetores com os dados
+Estratos <- c("EESC", "ICMC", "IFSC", "IQSC", "IAU", "Outros","Total")
+N_amostra <- c(round(c(n_1, n_2, n_3, n_4, n_5, n_6),digits = 0), floor(n))
+
+# Criar a tabela
+dados <- data.frame(Estratos = Estratos, n_amostra = N_amostra)
+#knitr::kable(dados, format = "html", align = "l")
+print(dados)
+```
+
+# Conclusões
+
+De acordo com os resultados, o tamanho da amostra para 2023 seria 163.
+
+Os resultados apresentados foram baseados em alfa = 0.05 e erro = 0.05, porém se os valores se modificam podemos ter outros tamanhos de amostra e encontrar maiores diferenças entre eles.
+
+Além disso, definimos uma proporção de 20% da população para realizar o cálculo do tamanho da amostra.
+
+# Referências
+
+-   Lima Filho, L. M. A. AMOSTRAGEM. Slides de aula apresentados na disciplina de Amostragem, Universidade Federal da Paraíba, Departamento de Estatística, João Pessoa, Paraíba, Brasil. [Link](http://www.de.ufpb.br/~luiz/Economia/Aula%2010.pdf)
+-   [http://www.saocarlos.usp.br/wp-content/uploads/2022/01/N%C3%BAmeros-USP-S%C3%A3o- Carlos-2021-1.pdf](http://www.saocarlos.usp.br/wp-content/uploads/2022/01/N%C3%BAmeros-USP-S%C3%A3o-){.uri}
+-   <https://pt.surveymonkey.com/mp/sample-size-calculator/>

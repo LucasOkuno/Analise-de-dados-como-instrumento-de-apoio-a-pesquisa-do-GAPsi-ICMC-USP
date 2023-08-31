@@ -1,0 +1,161 @@
+---
+title: "Grad2022Alfa_cronbach"
+author: "Lucas Yuki Okuno"
+date: "2023-03-30"
+output: html_document
+---
+
+## Importando as Bibliotecas
+
+```{r}
+rm(list = ls())
+library(knitr)
+library(readxl)
+library(psych)
+library(ggpubr)
+```
+
+# Base de dados
+
+```{r}
+#df <- read_excel("GradUAÇÃOLIMITES.xlsx", col_names=TRUE)
+df <- read_excel("Graduação_mapeamento.xlsx", col_names=TRUE)
+attach(df)
+
+```
+
+# Transformando as variáveis em números inteiros
+
+```{r}
+df <- transform(df, Q41 = as.integer(Q41), Q43 = as.integer(Q43), Q46 = as.integer(Q46),
+                Q48 = as.integer(Q48), Q50 = as.integer(Q50), Q54 = as.integer(Q54),
+                Q57 = as.integer(Q57), Q60 = as.integer(Q60), Q62 = as.integer(Q62),
+                Q64 = as.integer(Q64), Q71 = as.integer(Q71), Q77 = as.integer(Q77), 
+                Q84 = as.integer(Q84), Q87 = as.integer(Q87))
+
+df <- transform(df, Q38 = as.integer(Q38), Q55 = as.integer(Q55), Q59 = as.integer(Q59),
+                Q61 = as.integer(Q61), Q63 = as.integer(Q63), Q66 = as.integer(Q66),
+                Q68 = as.integer(Q68), Q70 = as.integer(Q70), Q72 = as.integer(Q72),
+                Q74 = as.integer(Q74), Q75 = as.integer(Q75), Q91 = as.integer(Q91))
+
+df <- transform(df, Q39 = as.integer(Q39), Q42 = as.integer(Q42), Q44 = as.integer(Q44),
+                Q45 = as.integer(Q45), Q51 = as.integer(Q51), Q56 = as.integer(Q56),
+                Q58 = as.integer(Q58), Q69 = as.integer(Q69), Q83 = as.integer(Q83),
+                Q86 = as.integer(Q86), Q88 = as.integer(Q88), Q92 = as.integer(Q92))
+
+
+df <- transform(df, Q47 = as.integer(Q47), Q65 = as.integer(Q65), Q67 = as.integer(Q67),
+                Q73 = as.integer(Q73), Q76 = as.integer(Q76), Q79 = as.integer(Q79),
+                Q81 = as.integer(Q81), Q85 = as.integer(Q85), Q89 = as.integer(Q89))
+
+
+df <- transform(df, Q40 = as.integer(Q40), Q49 = as.integer(Q49), Q52 = as.integer(Q52),
+                Q53 = as.integer(Q53), Q78 = as.integer(Q78), Q80 = as.integer(Q80),
+                Q82 = as.integer(Q82), Q90 = as.integer(Q90))
+
+```
+
+# Alfa de Crobach
+
+### Calculando o Alfa De cronbach - Dimensão Pessoal
+
+```{r,warning = FALSE, message = FALSE}
+
+mean(score_dim_pessoal)
+sd(score_dim_pessoal)
+
+dim_pessoal = df[,c(43,45,48,50,52,56,59,62,64,66,73,79,86,89)]
+head(dim_pessoal)
+
+psych::alpha(dim_pessoal)
+
+ord1 <- polychoric(dim_pessoal)
+psych::alpha(ord1$rho)
+
+```
+
+### Calculando o alfa de Cronbach - Dimensão Interpessoal
+
+```{r,warning = FALSE}
+
+mean(score_dim_interpessoal)
+sd(score_dim_interpessoal)
+
+dim_interpessoal = df[,c(40,57,61,63,65,68,70,72,74,76,77,93)]
+head(dim_interpessoal)
+
+psych::alpha(dim_interpessoal)
+
+ord2 <- polychoric(dim_interpessoal)
+psych::alpha(ord2$rho)
+```
+
+### Calculando o alfa de Cronbach - Dimensão Carreira
+
+```{r,warning = FALSE}
+
+mean(score_dim_carreira)
+sd(score_dim_carreira)
+
+dim_carreira = df[,c(41,44,46,47,53,58,60,71,85,88,90,94)]
+head(dim_carreira)
+
+psych::alpha(dim_carreira)
+
+ord3 <- polychoric(dim_carreira)
+psych::alpha(ord3$rho)
+```
+
+### Calculando o alfa de Cronbach - Dimensão Estudo
+
+```{r,warning = FALSE}
+
+mean(score_dim_estudo)
+sd(score_dim_estudo)
+
+dim_estudo = df[,c(49,67,69,75,78,81,83,87,91)]
+head(dim_estudo)
+
+psych::alpha(dim_estudo)
+
+ord4 <- polychoric(dim_estudo)
+psych::alpha(ord4$rho)
+```
+
+### Calculando o alfa de Cronbach - Dimensão Institucional
+
+```{r,warning = FALSE}
+
+mean(score_dim_institucional)
+sd(score_dim_institucional)
+
+dim_institucional = df[,c(42,51,54,55,80,82,84,92)]
+head(dim_institucional)
+
+psych::alpha(dim_institucional)
+
+ord5 <- polychoric(dim_institucional)
+psych::alpha(ord5$rho)
+```
+
+## Calculando o alfa de Cronbach - SRQ20
+
+```{r,warning = FALSE}
+
+mean(scoreSRQ)
+sd(scoreSRQ)
+
+dim_srq = df[,c(15:34)]
+head(dim_srq)
+
+psych::alpha(dim_srq)
+
+ord6 <- polychoric(dim_srq)
+psych::alpha(ord6$rho)
+```
+
+```{r}
+boxplot(score_dim_pessoal,score_dim_interpessoal,score_dim_carreira, score_dim_estudo, score_dim_institucional,main='Dimensões',  ylab ='score',legend=c('carreira','estudo','instituicção','interpessoal','pessoal'))
+
+boxplot(scoreSRQ, xlab='scoreSRQ')
+```

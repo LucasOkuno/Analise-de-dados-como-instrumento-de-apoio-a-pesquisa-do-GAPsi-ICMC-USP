@@ -1,0 +1,233 @@
+---
+title: Determinação do Número de amostras para estimar a média do SRQ20 para a pesquisa
+  do Gapsi na Graduação 2023 usando populações Finitas
+author: "Lucas Yuki Okuno"
+date: "2023-07-24"
+output:
+  html_document: default
+  word_document: default
+  pdf_document: default
+---
+
+## Introdução
+O Grupo de Apoio Psicopedagógico do ICMC/USP - São Carlos (GAPsi) tem umpapel fundamental no processo de acolhimento dos estudantes, criado com o objetivo de desenvolver e incentivar atividades preventivas de caráter psicopedagógico auxiliando na saúde e bem-estar psicológico no contexto universitário.
+Desde sua criação em 2018, tem levantado dados acerca de diversos temas relacionados com suas atividades e, dessa forma, os metódos de amostragem se mostram necessários em um trabalho de pesquisa experimental, de forma à obter representatividade em relação ao campus e poder estatístico. 
+Atualmente, o levantamento de dados é construído pelo Gapsi e realizado através de questionários anuais e aplicado em todo o campus da USP - São Carlos. Dessa forma, com base em estudos aplicados anteriormente, temos aqui o objetivo de determinar o número de amostras necessárias com base na média do SRQ20 para a pesquisa do Gapsi na Graduação 2023 de modo que possamos obter validade estatística ao experimento.
+
+## Material e Métodos
+
+```{r}
+#Bibliotecas
+library(readxl)
+
+```
+
+De acordo com os dados disponibilizados em [População USP](http://www.saocarlos.usp.br/wp-content/uploads/2022/01/N%C3%BAmeros-USP-S%C3%A3o-Carlos-2021-1.pdf), conseguimos obter as informações à respeito da nossa População que são os estudantes de graduação da USP - São Carlos, obtendo os seguintes resultados: 
+
+```{r, echo = FALSE}
+# Criar os vetores com os dados
+institutos <- c("EESC", "ICMC", "IFSC", "IQSC", "IAU", "Interunidades (Lic e Eng Comp)", "Total")
+
+pop2023 <- c(2426, 1098, 444, 288, 273, 447, 4976) 
+
+# Criar a tabela
+dados <- data.frame(Institutos = institutos, Quantidade = pop2023)
+#knitr::kable(dados, format = "html", align = "l")
+print(dados)
+```
+
+---
+Como queremos determinar o tamanho da amostra para estimar a média de uma população finita, utilizaremos a seguinte fórmula: 
+
+$n = \frac{N*\sigma^2*(Z_\frac{\alpha}{2})^2}{(N-1)*E^2+\sigma^2*(Z_\frac{\alpha}{2})^2}$
+
+Onde
+
+- n = Número de individuos na amostra
+- $Z_\frac{\alpha}{2}$ = Valor critico correspondente ao grau de confiança desejado
+- E = margem de erro
+- $\sigma^2$ = Variância
+- N = Total Populacional
+
+Faremos a determinação da amostra para estimar a média do SRQ20, por tanto, utilizaremos um estudo anterior do SRQ20 para a graduação da USP-São Carlos em 2021 e 2022 com os dados coletados pelo GAPsi:
+
+```{r, eval = TRUE}
+Graduacao2021 <- read_excel("Graduação2021.xlsx", col_names=TRUE)
+Graduacao2022 <- read_excel("Graduação2022.xlsx", col_names = TRUE)
+```
+
+```{r}
+media2021 <- mean(Graduacao2021$scoreSQR)
+dp2021 <- sd(Graduacao2021$scoreSQR)
+
+cat("Média SRQ20 em 2021: ",media2021,"\n")
+cat("Desvio Padrão SRQ20 em 2021: ",dp2021,"\n")
+
+
+media2022 <- mean(Graduacao2022$scoreSRQ)
+dp2022 <- sd(Graduacao2022$scoreSRQ)
+
+cat("Média SRQ20 em 2022: ",media2022,"\n")
+cat("Desvio Padrão SRQ20 em 2022: ",dp2022,"\n")
+```
+
+Utilizaremos $\alpha = 0.05$ e $E = 0.5$. Dessa forma, temos os seguintes resultados:
+
+```{r, echo = FALSE}
+# Criar os vetores com os dados
+Medidas <- c("Alfa", "Z alfa/2", "E", "Sigma2_2021", "Media_2021", "Sigma2_2022","Media_2022","N")
+N = 4976
+alfa <- 0.05
+z_alfa<- qnorm(1-alfa/2)
+E <- 0.5
+
+Valor <- c(alfa, z_alfa, E, dp2021, media2021, dp2022, media2022,N)
+
+# Criar a tabela
+dados <- data.frame(Medidas = Medidas, Valor = Valor)
+
+# Imprimir a tabela
+#knitr::kable(dados, format = "html", align = "c")
+print(dados)
+
+
+```
+
+Aplicando na fórmula, temos:
+
+```{r, echo=FALSE}
+
+#Para 2021:
+n_2021= (N* (dp2021^2) * z_alfa^2)/((N-1)*E^2+(dp2021^2)*(z_alfa^2))
+cat("Tamanho da amostra com dados de 2021: ",round(n_2021),"\n")
+
+#Para 2022:
+n_2022= (N* (dp2022^2) * z_alfa^2)/((N-1)*E^2+(dp2022^2)*(z_alfa^2))
+cat("Tamanho da amostra com dados de 2022: ",round(n_2022),"\n")
+```
+
+
+Visto que o campus é divido em institutos, podemos agora utilizar a amostragem estratificada e a alocação proporcional para encontrar a quantidade de amostras necessárias em cada um dos institutos para obter o número de amostras necessárias em cada instituto, sendo proporcional ao tamanho de cada um dos institutos.
+
+### Alocação Proporcional 
+
+Nesse método, as unidades populacionais (que em nosso caso são cada um dos institutos do campus) são distribuídas nos estratos segundo as proporções:
+
+$W_h = N_h/N, h = 1,...,H$ com $\sum_{h=1}^{H}W_h=1$ 
+
+As proporcções amostrais nos institutos são definidas como:
+
+$\lambda_h = n_h/n, h=1,...,H$ com $\sum_{h=1}^{H}\lambda_h=1$
+
+Assim, o critério de alocação proporcional implica em:
+
+$\lambda_h = W_h,\forall h=1,...,H.$
+
+Logo:
+
+$n_h = n\frac{N_h}{N}=nW_h, \forall h = 1,...,H.$ 
+
+Esta distribuição da amostra nos estratos é denominada Alocação Proporcional e iremos fazer o seu cálculo para os institutos da USP-São Carlos.
+
+Sabemos que:
+
+Total Populacional $(N) = 5121$
+
+Tamanho da amostra 2021 $(n) = 363$
+
+Tamanho da amostra 2022 $(n) = 364$
+
+```{r, echo = FALSE}
+# Criar os vetores com os dados
+h <- c(1,2,3,4,5,6)
+Estratos <- c("EESC", "ICMC", "IFSC", "IQSC", "IAU", "Interunidades")
+Nh <- c(2426, 1098, 444, 288, 273, 447)
+
+# Criar a tabela
+dados <- data.frame(h = h, Estratos = Estratos, Nh = Nh)
+#knitr::kable(dados, format = "html", align = "l")
+print(dados)
+```
+Dessa forma, para encontrar a Alocação Proporcional de amostras para cada um dos institutos, basta calcular:
+
+
+## Amostra 2021:
+
+```{r}
+n1 = n_2021*(Nh[1]/N)
+cat("Tamanho da amostra EESC: ",round(n1),"\n")
+
+n2 = n_2021*(Nh[2]/N)
+cat("Tamanho da amostra ICMC: ",round(n2),"\n")
+
+n3 = n_2021*(Nh[3]/N)
+cat("Tamanho da amostra IFSC: ",round(n3),"\n")
+
+n4 = n_2021*(Nh[4]/N)
+cat("Tamanho da amostra IQSC: ",round(n4),"\n")
+
+n5 = n_2021*(Nh[5]/N)
+cat("Tamanho da amostra IAU: ",round(n5),"\n")
+
+n6 = n_2021*(Nh[6]/N)
+cat("Tamanho da amostra Interunidades: ",round(n6),"\n")
+
+
+soma = round(n1) + round(n2) + round(n3) + round(n4) + round(n5) + round(n6)
+cat("Tamanho da amostra Total: ",soma,"\n")
+```
+
+## Amostra 2022:
+
+```{r}
+n1 = n_2022*(Nh[1]/N)
+cat("Tamanho da amostra EESC: ",round(n1),"\n")
+
+n2 = n_2022*(Nh[2]/N)
+cat("Tamanho da amostra ICMC: ",round(n2),"\n")
+
+n3 = n_2022*(Nh[3]/N)
+cat("Tamanho da amostra IFSC: ",ceiling(n3),"\n")
+
+n4 = n_2022*(Nh[4]/N)
+cat("Tamanho da amostra IQSC: ",round(n4),"\n")
+
+n5 = n_2022*(Nh[5]/N)
+cat("Tamanho da amostra IAU: ",round(n5),"\n")
+
+n6 = n_2022*(Nh[6]/N)
+cat("Tamanho da amostra Interunidades: ",round(n6),"\n")
+
+
+soma = round(n1) + round(n2) + ceiling(n3) + round(n4) + round(n5) + round(n6)
+cat("Tamanho da amostra Total: ",soma,"\n")
+```
+
+Dessa forma, utilizando a alocação proporcional, a nossa amostra de 363 indivíduos seria dividida da seguinte forma:
+```{r, echo = FALSE}
+# Criar os vetores com os dados
+Estratos <- c("EESC", "ICMC", "IFSC", "IQSC", "IAU", "Interunidades", "Total")
+Amostra2021 <- c(182, 79, 30, 19, 20, 33, 363)
+Amostra2022 <- c(177, 80, 33, 21, 20, 33, 364)
+
+# Criar a tabela
+dados <- data.frame(Estratos = Estratos, Amostra2021 = Amostra2021, Amostra2022 = Amostra2022)
+#knitr::kable(dados, format = "html", align = "l")
+print(dados)
+```
+
+
+### Conclusões
+
+De acordo com as informações de 2021 e 2022 as amostras seriam essas que foram mostradas acima. Devemos lembrar que o resultado é influenciado se trocado o nivel de significância e o erro. 
+
+Podemos perceber que para 2021 e 2022 as amostras são semelhantes.
+
+### Referências
+
+- Lima Filho, L. M. A. AMOSTRAGEM. Slides de aula apresentados na disciplina de Amostragem, Universidade Federal da Paraíba, Departamento de Estatística, João Pessoa, Paraíba, Brasil. [Link](http://www.de.ufpb.br/~luiz/Economia/Aula%2010.pdf)
+
+- Silva, P. L. N., Bianchini, Z. M., Dias, A. J. R. (2021). Amostragem: Teoria e Pr´atica
+usando R, vers˜ao pre-liminar [link](https://amostragemcomr.github.io/livro/estrat.html#aloca%C3%A7%C3%A3o-proporcional)
+
+- http://www.saocarlos.usp.br/wp-content/uploads/2022/01/N%C3%BAmeros-USP-S%C3%A3o-Carlos-2021-1.pdf

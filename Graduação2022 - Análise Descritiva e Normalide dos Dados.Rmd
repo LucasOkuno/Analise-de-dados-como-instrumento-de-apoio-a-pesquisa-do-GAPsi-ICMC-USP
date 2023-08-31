@@ -1,0 +1,332 @@
+---
+title: "Graduação2022"
+author: "Lucas Yuki Okuno"
+date: "2023-03-22"
+output: html_document
+---
+
+## Importando as Bibliotecas
+
+```{r}
+rm(list = ls())
+library(knitr)
+library(readxl)
+library(psych)
+library(ggpubr)
+library(dunn.test)
+library(ggplot2)
+```
+
+# Base de dados
+
+```{r}
+df <- read_excel("Graduação2022.xlsx", col_names=TRUE)
+attach(df)
+
+```
+
+# Transformando as variáveis em números inteiros
+
+```{r}
+df <- transform(df, Q41 = as.integer(Q41), Q43 = as.integer(Q43), Q46 = as.integer(Q46),
+                Q48 = as.integer(Q48), Q50 = as.integer(Q50), Q54 = as.integer(Q54),
+                Q57 = as.integer(Q57), Q60 = as.integer(Q60), Q62 = as.integer(Q62),
+                Q64 = as.integer(Q64), Q71 = as.integer(Q71), Q77 = as.integer(Q77), 
+                Q84 = as.integer(Q84), Q87 = as.integer(Q87))
+
+df <- transform(df, Q38 = as.integer(Q38), Q55 = as.integer(Q55), Q59 = as.integer(Q59),
+                Q61 = as.integer(Q61), Q63 = as.integer(Q63), Q66 = as.integer(Q66),
+                Q68 = as.integer(Q68), Q70 = as.integer(Q70), Q72 = as.integer(Q72),
+                Q74 = as.integer(Q74), Q75 = as.integer(Q75), Q91 = as.integer(Q91))
+
+df <- transform(df, Q39 = as.integer(Q39), Q42 = as.integer(Q42), Q44 = as.integer(Q44),
+                Q45 = as.integer(Q45), Q51 = as.integer(Q51), Q56 = as.integer(Q56),
+                Q58 = as.integer(Q58), Q69 = as.integer(Q69), Q83 = as.integer(Q83),
+                Q86 = as.integer(Q86), Q88 = as.integer(Q88), Q92 = as.integer(Q92))
+
+
+df <- transform(df, Q47 = as.integer(Q47), Q65 = as.integer(Q65), Q67 = as.integer(Q67),
+                Q73 = as.integer(Q73), Q76 = as.integer(Q76), Q79 = as.integer(Q79),
+                Q81 = as.integer(Q81), Q85 = as.integer(Q85), Q89 = as.integer(Q89))
+
+
+df <- transform(df, Q40 = as.integer(Q40), Q49 = as.integer(Q49), Q52 = as.integer(Q52),
+                Q53 = as.integer(Q53), Q78 = as.integer(Q78), Q80 = as.integer(Q80),
+                Q82 = as.integer(Q82), Q90 = as.integer(Q90))
+
+```
+
+# Analise descritiva dos dados
+
+### Idade
+
+```{r}
+df$
+df <- transform(df, Q02 = as.integer(Q02))
+                
+barplot(table(Q02), las= 2, main = "Distribuição da Idade para graduandos da
+     USP - São Carlos", ylab = "Frequência", col = "#D8BFD8")
+
+boxplot(as.integer(Q02), col = "#D8BFD8", main="Boxplot - Idade", ylab="Frequência")
+```
+
+### Gênero
+
+```{r}
+ggplot(data=df, aes(Q03)) +ggtitle("Distribuição da Identidade de Gênero")+ geom_bar()+ theme(axis.text = element_text(size =10, angle=45))
+
+```
+
+### Raça\etnia
+
+```{r}
+barplot(table(Q04), main = "Distribuição da Raça/etnia para Graduandos", 
+        col = "#D8BFD8", ylab = "Frequência")
+```
+### Instituto
+
+```{r}
+ggplot(data=df, aes(Q06)) +ggtitle("Instituto")+ geom_bar()+ theme(axis.text = element_text(size =10, angle=45))
+```
+
+# Normalidade dos scores
+
+### score dim_pessoal
+```{r}
+hist(score_dim_pessoal, prob=TRUE, main='Histograma I', xlab='score_dim_pessoal',ylab='Densidade')
+lines(density(score_dim_pessoal), col='red')
+
+shapiro.test(score_dim_pessoal) #p-valor < 0.05 => Não apresenta Normalidade
+ggqqplot(score_dim_pessoal, main = "Normal Q-Q Plot dimensão pessoal", pch = 20)
+```
+
+### score dim_interpessoal
+
+```{r}
+hist(score_dim_interpessoal, prob=TRUE, main='Histograma II ', xlab='score_dim_interpessoal',ylab='Densidade')
+lines(density(score_dim_interpessoal), col='red')
+
+shapiro.test(score_dim_interpessoal) #p-valor < 0.05 => Não apresenta Normalidade
+ggqqplot(score_dim_interpessoal, main = "Normal Q-Q Plot dimensão interpessoal", pch = 20)
+```
+
+### score dim_carreira
+
+```{r}
+hist(score_dim_carreira, prob=TRUE, main='Histograma III', xlab='score_dim_carreira',ylab='Densidade')
+lines(density(score_dim_carreira), col='red')
+
+shapiro.test(score_dim_carreira) #p-valor < 0.05 => Não apresenta Normalidade
+ggqqplot(score_dim_carreira, main = "Normal Q-Q Plot dimensão carreira", pch = 20)
+```
+
+### score dim_estudo
+
+```{r}
+hist(score_dim_estudo, prob=TRUE, main='Histograma - dim_estudo', xlab='scoreSRQ',ylab='Densidade')
+lines(density(score_dim_estudo), col='red')
+
+shapiro.test(score_dim_estudo) #p-valor > 0.05 => Apresenta Normalidade
+ggqqplot(score_dim_estudo, main = "Normal Q-Q Plot dimensão estudo", pch = 20)
+```
+
+### score dim_institucional
+
+```{r}
+hist(score_dim_institucional, prob=TRUE, main='Histograma IV', xlab='score_dim_institucional', ylab='Densidade')
+lines(density(score_dim_institucional), col='red')
+
+shapiro.test(score_dim_institucional) #p-valor < 0.05 => Não apresenta Normalidade
+ggqqplot(score_dim_institucional, main = "Normal Q-Q Plot dimensão institucional", pch = 20)
+```
+
+### score SRQ
+
+```{r}
+hist(scoreSRQ, prob=TRUE, main='Histograma - Score SRQ', xlab='scoreSRQ', ylab='Densidade')
+lines(density(scoreSRQ), col='red')
+
+shapiro.test(scoreSRQ) #p-valor < 0.05 => Nao apresenta Normalidade
+ggqqplot(scoreSRQ, main = "Normal Q-Q Plot Score SRQ", pch = 20)
+```
+
+# TESTES NAO-PARAMETRICOS
+
+
+```{r}
+# Raça\etnia -> Branco | Não-Branco
+table(EtniaAgrupamento)
+
+# Idade ->   18- | 19 | 20 | 21&22 | 23&24 | 25+
+table(IdadeAgrupamento)
+
+# ano de ingresso
+table(AnoIngressoAgrupamento)
+
+# genero
+table(GeneroAgrupamento)
+```
+
+
+
+### comparando score dim_pessoal:
+
+```{r}
+
+#por etnia
+
+wilcox.test(score_dim_pessoal ~ EtniaAgrupamento)  # Não rejeitamos H0 (medianas similares quando comparado por etnia)
+
+#por idade
+kruskal.test(score_dim_pessoal~ IdadeAgrupamento) #Rejeitamos H0
+
+#por ano de ingresso
+kruskal.test(score_dim_pessoal ~ AnoIngressoAgrupamento) #Não Rejeitamos H0
+
+# por genero
+genero <- subset(GeneroAgrupamento, GeneroAgrupamento == 'Mulher cisgênero' | GeneroAgrupamento == 'Homem cisgênero' | GeneroAgrupamento == 'Outras identidades')
+dim_pessoal <- subset(score_dim_pessoal, GeneroAgrupamento == 'Mulher cisgênero' | GeneroAgrupamento == 'Homem cisgênero' | GeneroAgrupamento == 'Outras identidades')
+
+kruskal.test(dim_pessoal ~ genero) #Rejeitamos H0
+
+
+boxplot(score_dim_pessoal ~ IdadeAgrupamento, col = '#bbdec9', ylab ='score_dim_pessoal', xlab='IdadeAgrupamento')
+
+boxplot(dim_pessoal ~ genero, col = '#bbdec9', ylab ='score_dim_pessoal', xlab='Gênero')
+
+
+dunn.test(score_dim_pessoal,IdadeAgrupamento, altp = TRUE, alpha = 0.05)
+
+dunn.test(dim_pessoal, genero, IdadeAgrupamento, altp = TRUE, alpha = 0.05)
+
+```
+
+### comparando score dim_interpessoal:
+
+```{r}
+
+#por etnia
+
+wilcox.test(score_dim_interpessoal ~ EtniaAgrupamento)  # Não rejeitamos H0 (medianas similares quando comparado por etnia)
+
+#por idade
+kruskal.test(score_dim_interpessoal ~ IdadeAgrupamento) #Rejeitamos H0
+
+#por ano de ingresso
+kruskal.test(score_dim_interpessoal ~ AnoIngressoAgrupamento) #Não Rejeitamos H0
+
+# por genero
+
+dim_interpessoal <- subset(score_dim_interpessoal, GeneroAgrupamento == 'Mulher cisgênero' | GeneroAgrupamento == 'Homem cisgênero' | GeneroAgrupamento == 'Outras identidades')
+
+kruskal.test(dim_interpessoal ~ genero) #Não Rejeitamos H0
+
+
+boxplot(score_dim_interpessoal ~ IdadeAgrupamento, col = '#bbdec9', ylab='score_dim_interpessoal', xlab='IdadeAgrupamento')
+
+
+dunn.test(score_dim_interpessoal, IdadeAgrupamento, altp = TRUE, alpha = 0.05)
+```
+
+
+### comparando score dim_carreira:
+
+```{r}
+
+#por etnia
+
+wilcox.test(score_dim_carreira ~ EtniaAgrupamento)  # Não rejeitamos H0 (medianas similares quando comparado por etnia)
+
+#por idade
+kruskal.test(score_dim_carreira ~ IdadeAgrupamento) #Não Rejeitamos H0
+
+#por ano de ingresso
+kruskal.test(score_dim_carreira ~ AnoIngressoAgrupamento) #Não Rejeitamos H0
+
+# por genero
+
+dim_carreira <- subset(score_dim_carreira, GeneroAgrupamento == 'Mulher cisgênero' | GeneroAgrupamento == 'Homem cisgênero' | GeneroAgrupamento == 'Outras identidades')
+
+kruskal.test(dim_carreira ~ genero) # Rejeitamos H0
+
+
+boxplot(dim_carreira ~ genero, col = '#bbdec9', ylab='score_dim_carreira', xlab='Gênero')
+
+
+dunn.test(dim_carreira, genero , altp = TRUE, alpha = 0.05)
+```
+
+### comparando score SRQ:
+
+```{r}
+
+#por etnia
+
+wilcox.test(scoreSRQ ~ EtniaAgrupamento)  # Não rejeitamos H0 (medianas similares quando comparado por etnia)
+
+#por idade
+kruskal.test(scoreSRQ ~ IdadeAgrupamento) # Rejeitamos H0
+
+#por ano de ingresso
+kruskal.test(scoreSRQ ~ AnoIngressoAgrupamento) #Não Rejeitamos H0
+
+# por genero
+
+dim_srq <- subset(score_dim_institucional, GeneroAgrupamento == 'Mulher cisgênero' | GeneroAgrupamento == 'Homem cisgênero' | GeneroAgrupamento == 'Outras identidades')
+
+kruskal.test(dim_srq ~ genero) # Não Rejeitamos H0
+
+
+boxplot(scoreSRQ ~ IdadeAgrupamento, col = '#bbdec9', ylab='score_dim_SRQ', xlab='IdadeAgrupamento')
+
+
+dunn.test(scoreSRQ, IdadeAgrupamento , altp = TRUE, alpha = 0.05)
+```
+
+# TESTES PARAMÉTRICOS
+
+### comparando score dim_estudo:
+
+```{r}
+#por etnia
+
+t.test(score_dim_estudo ~ EtniaAgrupamento) # Não Rejeitamo H0
+
+
+#por idade
+a <- aov(score_dim_estudo ~ IdadeAgrupamento) #Não Rejeitamo H0
+summary(a)
+
+#por ano de ingresso
+b <- aov(score_dim_estudo ~ AnoIngressoAgrupamento) #Não Rejeitamo H0
+summary(b)
+
+#por genero
+dim_estudo <- subset(score_dim_estudo,  GeneroAgrupamento == 'Mulher cisgênero' | GeneroAgrupamento == 'Homem cisgênero' | GeneroAgrupamento == 'Outras identidades')
+c <- aov(dim_estudo ~ genero) #Não Rejeitamo H0
+summary(c)
+```
+
+### comparando score dim_intitucional:
+
+```{r}
+
+#por etnia
+
+t.test(score_dim_institucional ~ EtniaAgrupamento)  # Não rejeitamos H0 (medianas similares quando comparado por etnia)
+
+#por idade
+d <- aov(score_dim_institucional ~ IdadeAgrupamento) #Não Rejeitamos H0
+summary(d)
+
+#por ano de ingresso
+e <- aov(score_dim_institucional ~ AnoIngressoAgrupamento) #Não Rejeitamos H0
+summary(e)
+
+# por genero
+
+dim_institucional <- subset(score_dim_institucional, GeneroAgrupamento == 'Mulher cisgênero' | GeneroAgrupamento == 'Homem cisgênero' | GeneroAgrupamento == 'Outras identidades')
+
+f <- aov(dim_institucional ~ genero) # Não Rejeitamos H0
+summary(f)
+```
